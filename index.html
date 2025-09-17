@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PPA Image Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@700&family=Farsan&family=Poppins:wght@500;800&family=Tomorrow:wght@400;800&display=swap" rel="stylesheet">
@@ -164,7 +164,14 @@
                 </div>
                  <!-- Player Selection - now part of background controls -->
                 <div id="player-select-wrapper" class="hidden mt-4">
-                    <label class="font-semibold text-slate-700 mb-2 block border-t pt-4 mt-4">Optional: Add Player Images</label>
+                    <div class="flex items-center justify-between">
+                         <label class="font-semibold text-slate-700 mb-2 block border-t pt-4 mt-4">Optional: Add Player Images</label>
+                         <div class="flex items-center pt-4 mt-4">
+                            <input type="checkbox" id="doubles-checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <label for="doubles-checkbox" class="ml-2 text-sm text-slate-700 font-medium">Doubles</label>
+                        </div>
+                    </div>
+                   
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label for="player1-search" class="text-sm font-medium text-slate-600 mb-1 block">Player 1</label>
@@ -181,10 +188,30 @@
                             </select>
                         </div>
                     </div>
+                     <div id="doubles-players-wrapper" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 hidden">
+                        <div>
+                            <label for="player3-search" class="text-sm font-medium text-slate-600 mb-1 block">Player 3</label>
+                            <input type="text" id="player3-search" placeholder="Search Player 3..." class="w-full px-3 py-2 text-slate-700 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm mb-2">
+                            <select id="player3-select" class="w-full px-3 py-2 text-slate-700 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                <option value="">Select Player 3</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="player4-search" class="text-sm font-medium text-slate-600 mb-1 block">Player 4</label>
+                             <input type="text" id="player4-search" placeholder="Search Player 4..." class="w-full px-3 py-2 text-slate-700 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm mb-2">
+                            <select id="player4-select" class="w-full px-3 py-2 text-slate-700 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                <option value="">Select Player 4</option>
+                            </select>
+                        </div>
+                    </div>
                     <div id="player-loading-error" class="text-red-500 text-sm mt-1 hidden">Could not load player data.</div>
                      <div id="player-images-preview" class="grid grid-cols-2 gap-4 mt-2">
                         <img id="player1-preview" src="https://placehold.co/300x200/e2e8f0/e2e8f0?text=." class="w-full h-auto object-cover rounded-md bg-slate-100 aspect-[3/2]" alt="Player 1 Preview"/>
                         <img id="player2-preview" src="https://placehold.co/300x200/e2e8f0/e2e8f0?text=." class="w-full h-auto object-cover rounded-md bg-slate-100 aspect-[3/2]" alt="Player 2 Preview"/>
+                    </div>
+                    <div id="doubles-preview-wrapper" class="grid grid-cols-2 gap-4 mt-2 hidden">
+                        <img id="player3-preview" src="https://placehold.co/300x200/e2e8f0/e2e8f0?text=." class="w-full h-auto object-cover rounded-md bg-slate-100 aspect-[3/2]" alt="Player 3 Preview"/>
+                        <img id="player4-preview" src="https://placehold.co/300x200/e2e8f0/e2e8f0?text=." class="w-full h-auto object-cover rounded-md bg-slate-100 aspect-[3/2]" alt="Player 4 Preview"/>
                     </div>
                 </div>
             </div>
@@ -230,12 +257,21 @@
             const dropzonePrompt = document.getElementById('dropzone-prompt');
             const fileError = document.getElementById('file-error');
             const playerSelectWrapper = document.getElementById('player-select-wrapper');
+            const doublesCheckbox = document.getElementById('doubles-checkbox');
+            const doublesPlayersWrapper = document.getElementById('doubles-players-wrapper');
+            const doublesPreviewWrapper = document.getElementById('doubles-preview-wrapper');
             const player1Select = document.getElementById('player1-select');
             const player2Select = document.getElementById('player2-select');
+            const player3Select = document.getElementById('player3-select');
+            const player4Select = document.getElementById('player4-select');
             const player1Search = document.getElementById('player1-search');
             const player2Search = document.getElementById('player2-search');
+            const player3Search = document.getElementById('player3-search');
+            const player4Search = document.getElementById('player4-search');
             const player1Preview = document.getElementById('player1-preview');
             const player2Preview = document.getElementById('player2-preview');
+            const player3Preview = document.getElementById('player3-preview');
+            const player4Preview = document.getElementById('player4-preview');
             const playerLoadingError = document.getElementById('player-loading-error');
             const customTextInput = document.getElementById('custom-text-input');
             const outputSection = document.getElementById('output-section');
@@ -293,19 +329,18 @@
                 } catch (error) {
                     console.error("Failed to fetch player data:", error);
                     playerLoadingError.classList.remove('hidden');
-                    player1Select.innerHTML = '<option value="">Error loading data</option>';
-                    player2Select.innerHTML = '<option value="">Error loading data</option>';
+                    [player1Select, player2Select, player3Select, player4Select].forEach(sel => {
+                        sel.innerHTML = '<option value="">Error loading data</option>';
+                    });
                 }
             }
 
             function populateDropdowns() {
-                player1Select.innerHTML = '<option value="">Select Player 1</option>';
-                player2Select.innerHTML = '<option value="">Select Player 2</option>';
-                playersData.forEach(player => {
-                    const option1 = new Option(player.name, player.imageUrl);
-                    const option2 = new Option(player.name, player.imageUrl);
-                    player1Select.add(option1);
-                    player2Select.add(option2);
+                [player1Select, player2Select, player3Select, player4Select].forEach((sel, index) => {
+                    sel.innerHTML = `<option value="">Select Player ${index + 1}</option>`;
+                    playersData.forEach(player => {
+                        sel.add(new Option(player.name, player.imageUrl));
+                    });
                 });
             }
 
@@ -369,31 +404,34 @@
                 e.target.value = e.target.value.toUpperCase();
                 e.target.setSelectionRange(start, start);
             });
-            player1Select.addEventListener('change', () => {
-                player1Preview.src = player1Select.value || 'https://placehold.co/300x200/e2e8f0/e2e8f0?text=.';
+            doublesCheckbox.addEventListener('change', () => {
+                const isChecked = doublesCheckbox.checked;
+                doublesPlayersWrapper.classList.toggle('hidden', !isChecked);
+                doublesPreviewWrapper.classList.toggle('hidden', !isChecked);
+                if (!isChecked) {
+                    player3Select.value = '';
+                    player4Select.value = '';
+                    player3Select.dispatchEvent(new Event('change'));
+                    player4Select.dispatchEvent(new Event('change'));
+                }
                 updateGenerateButtonState();
             });
-            player2Select.addEventListener('change', () => {
-                player2Preview.src = player2Select.value || 'https://placehold.co/300x200/e2e8f0/e2e8f0?text=.';
-                updateGenerateButtonState();
-            });
+
+            player1Select.addEventListener('change', () => { player1Preview.src = player1Select.value || 'https://placehold.co/300x200/e2e8f0/e2e8f0?text=.'; updateGenerateButtonState(); });
+            player2Select.addEventListener('change', () => { player2Preview.src = player2Select.value || 'https://placehold.co/300x200/e2e8f0/e2e8f0?text=.'; updateGenerateButtonState(); });
+            player3Select.addEventListener('change', () => { player3Preview.src = player3Select.value || 'https://placehold.co/300x200/e2e8f0/e2e8f0?text=.'; updateGenerateButtonState(); });
+            player4Select.addEventListener('change', () => { player4Preview.src = player4Select.value || 'https://placehold.co/300x200/e2e8f0/e2e8f0?text=.'; updateGenerateButtonState(); });
+            
             player1Search.addEventListener('input', () => filterDropdown(player1Search, player1Select));
             player2Search.addEventListener('input', () => filterDropdown(player2Search, player2Select));
+            player3Search.addEventListener('input', () => filterDropdown(player3Search, player3Select));
+            player4Search.addEventListener('input', () => filterDropdown(player4Search, player4Select));
 
-             // --- Filter function for player dropdowns ---
             function filterDropdown(searchInput, selectElement) {
                 const filter = searchInput.value.toLowerCase();
-                const options = selectElement.getElementsByTagName('option');
-                for (let i = 0; i < options.length; i++) {
-                    const option = options[i];
+                for (const option of selectElement.options) {
                     const txtValue = option.textContent || option.innerText;
-                    if (option.value === "") { // Always show the "Select Player" option
-                        option.style.display = "";
-                    } else if (txtValue.toLowerCase().indexOf(filter) > -1) {
-                        option.style.display = "";
-                    } else {
-                        option.style.display = "none";
-                    }
+                    option.style.display = (option.value === "" || txtValue.toLowerCase().includes(filter)) ? "" : "none";
                 }
             }
 
@@ -401,8 +439,10 @@
             // --- Button State Logic ---
             function updateGenerateButtonState() {
                 const isDiagonal = document.querySelector('input[name="bg-type"]:checked').value === 'diagonal';
-                const playersSelected = player1Select.value && player2Select.value;
-                
+                let playersSelected = player1Select.value && player2Select.value;
+                if (doublesCheckbox.checked) {
+                    playersSelected = playersSelected && player3Select.value && player4Select.value;
+                }
                 generateBtn.disabled = !(uploadedLogo || (isDiagonal && playersSelected));
             }
 
@@ -419,13 +459,13 @@
                 generateBtn.textContent = 'Generating...';
                 
                 try {
+                    await document.fonts.load('300 1em Inter');
+                    await document.fonts.load('800 1em Inter');
                     await document.fonts.load('bold 1em Inter');
                     await document.fonts.load('300 1em Farsan');
                     await document.fonts.load('800 1em Poppins');
                     await document.fonts.load('700 1em Chakra Petch');
-                } catch (err) {
-                    console.error('Font could not be loaded: ', err);
-                }
+                } catch (err) { console.error('Font could not be loaded: ', err); }
                 
                 await new Promise(resolve => setTimeout(resolve, 50));
 
@@ -442,22 +482,15 @@
                     canvas.height = size.height;
                     const ctx = canvas.getContext('2d');
 
-                    // 1. Fill background
                     if (bgType === 'solid') {
                         ctx.fillStyle = color1;
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    } else { // 'diagonal'
+                    } else {
                         const offset = canvas.width * 0.1;
                         ctx.fillStyle = color1;
-                        ctx.beginPath();
-                        ctx.moveTo(0, 0); ctx.lineTo(canvas.width / 2 + offset, 0);
-                        ctx.lineTo(canvas.width / 2 - offset, canvas.height); ctx.lineTo(0, canvas.height);
-                        ctx.closePath(); ctx.fill();
+                        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(canvas.width / 2 + offset, 0); ctx.lineTo(canvas.width / 2 - offset, canvas.height); ctx.lineTo(0, canvas.height); ctx.closePath(); ctx.fill();
                         ctx.fillStyle = color2;
-                        ctx.beginPath();
-                        ctx.moveTo(canvas.width / 2 + offset, 0); ctx.lineTo(canvas.width, 0);
-                        ctx.lineTo(canvas.width, canvas.height); ctx.lineTo(canvas.width / 2 - offset, canvas.height);
-                        ctx.closePath(); ctx.fill();
+                        ctx.beginPath(); ctx.moveTo(canvas.width / 2 + offset, 0); ctx.lineTo(canvas.width, 0); ctx.lineTo(canvas.width, canvas.height); ctx.lineTo(canvas.width / 2 - offset, canvas.height); ctx.closePath(); ctx.fill();
                     }
                     
                     if (addBlurCheckbox.checked) {
@@ -467,39 +500,81 @@
                     }
 
                     if (usePlayers) {
-                        const playerImg1 = await loadImage(player1Select.value);
-                        const playerImg2 = await loadImage(player2Select.value);
-                        
-                        // Player images are now 85% of the canvas height
-                        const imgHeight = canvas.height * 0.85; 
-                        const img1Width = imgHeight * (playerImg1.width / playerImg1.height);
-                        const img2Width = imgHeight * (playerImg2.width / playerImg2.height);
-                        
-                        // Align images to the bottom of the canvas
-                        const imgY = canvas.height - imgHeight;
+                        const doublesMode = doublesCheckbox.checked && player3Select.value && player4Select.value;
 
-                        // Define the position for the name boxes, which remains unchanged.
-                        const nameBoxPadding = canvas.width * -0.1;
-                        const nameBox1X = nameBoxPadding;
-                        const nameBox2X = canvas.width - img2Width - nameBoxPadding;
+                        if (doublesMode) {
+                            const [p1, p2, p3, p4] = await Promise.all([
+                                loadImage(player1Select.value), loadImage(player2Select.value),
+                                loadImage(player3Select.value), loadImage(player4Select.value)
+                            ]);
+                            
+                            const imgHeight = canvas.height * 0.85;
+                            const p1Width = imgHeight * (p1.width / p1.height);
+                            const p2Width = imgHeight * (p2.width / p2.height);
 
-                        // Define the new, inward position for the player images.
-                        const imagePadding = 0; // Moving inward 10% from -10% is 0%.
-                        const img1X = imagePadding;
-                        const img2X = canvas.width - img2Width - imagePadding;
-                        
-                        ctx.drawImage(playerImg1, img1X, imgY, img1Width, imgHeight);
-                        ctx.drawImage(playerImg2, img2X, imgY, img2Width, imgHeight);
-                        
-                        // Draw names
-                        const player1Name = player1Select.options[player1Select.selectedIndex].text;
-                        const player2Name = player2Select.options[player2Select.selectedIndex].text;
+                            const p3Height = imgHeight * 0.9;
+                            const p3Width = p3Height * (p3.width / p3.height);
 
-                        // Use the original name box coordinates to ensure they don't move with the images.
-                        drawPlayerName(ctx, player1Name, nameBox1X, imgY, img1Width, imgHeight);
-                        drawPlayerName(ctx, player2Name, nameBox2X, imgY, img2Width, imgHeight);
+                            const p4Height = imgHeight * 0.9;
+                            const p4Width = p4Height * (p4.width / p4.height);
+                           
+                            const imgY = canvas.height - imgHeight;
+                            const p3Y = canvas.height - p3Height;
+                            const p4Y = canvas.height - p4Height;
 
-                        // Draw "FULL MATCH" text
+                            const separationOffset = canvas.width * 0.015; // 1.5% for each side of the 3% gap
+
+                            const p1OrigX = 0;
+                            const p2OrigX = canvas.width - p2Width;
+
+                            // Left side players
+                            const p1TargetX = p1OrigX - (canvas.width * 0.12);
+                            const p3TargetX = p1OrigX;
+                            const p1NewX = p1TargetX - separationOffset;
+                            const p3NewX = p3TargetX + separationOffset + (canvas.width * 0.08);
+
+
+                            // Right side players
+                            const p2TargetX = p2OrigX + (canvas.width * 0.12);
+                            const p4TargetX = p2OrigX;
+                            const p2NewX = p2TargetX + separationOffset;
+                            const p4NewX = p4TargetX - separationOffset - (canvas.width * 0.08);
+
+                            // Draw bottom players first, then top players
+                            ctx.drawImage(p1, p1NewX, imgY, p1Width, imgHeight);
+                            ctx.drawImage(p3, p3NewX, p3Y, p3Width, p3Height);
+                            
+                            ctx.drawImage(p2, p2NewX, imgY, p2Width, imgHeight);
+                            ctx.drawImage(p4, p4NewX, p4Y, p4Width, p4Height);
+                            
+                            const name1 = player1Select.options[player1Select.selectedIndex].text;
+                            const name2 = player2Select.options[player2Select.selectedIndex].text;
+                            const name3 = player3Select.options[player3Select.selectedIndex].text;
+                            const name4 = player4Select.options[player4Select.selectedIndex].text;
+
+                            // Pass top player (P3/P4) name first, then bottom player (P1/P2)
+                            drawDoublesNames(ctx, name3, name1, 'left');
+                            drawDoublesNames(ctx, name4, name2, 'right');
+
+                        } else {
+                            const playerImg1 = await loadImage(player1Select.value);
+                            const playerImg2 = await loadImage(player2Select.value);
+                            const imgHeight = canvas.height * 0.85;
+                            const img1Width = imgHeight * (playerImg1.width / playerImg1.height);
+                            const img2Width = imgHeight * (playerImg2.width / playerImg2.height);
+                            const imgY = canvas.height - imgHeight;
+                            const img1X = 0;
+                            const img2X = canvas.width - img2Width;
+                            ctx.drawImage(playerImg1, img1X, imgY, img1Width, imgHeight);
+                            ctx.drawImage(playerImg2, img2X, imgY, img2Width, imgHeight);
+                            
+                            const player1Name = player1Select.options[player1Select.selectedIndex].text;
+                            const player2Name = player2Select.options[player2Select.selectedIndex].text;
+                            
+                            drawPlayerName(ctx, player1Name, img1X, imgY, img1Width, imgHeight);
+                            drawPlayerName(ctx, player2Name, img2X, imgY, img2Width, imgHeight);
+                        }
+
                         const fullMatchFontSize = Math.floor(canvas.height * 0.06);
                         ctx.font = `bold ${fullMatchFontSize}px "Inter"`;
                         ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
@@ -517,11 +592,7 @@
                          const maxLogoDim = Math.min(canvas.width, canvas.height) * paddingPercent;
                          const logoAR = uploadedLogo.width / uploadedLogo.height;
                          let logoWidth, logoHeight;
-                         if (logoAR > 1) {
-                            logoWidth = maxLogoDim; logoHeight = logoWidth / logoAR;
-                         } else {
-                            logoHeight = maxLogoDim; logoWidth = logoHeight * logoAR;
-                         }
+                         if (logoAR > 1) { logoWidth = maxLogoDim; logoHeight = logoWidth / logoAR; } else { logoHeight = maxLogoDim; logoWidth = logoHeight * logoAR; }
                          const logoY = ((canvas.height - logoHeight) / 2) - (canvas.height * 0.1);
                          ctx.drawImage(uploadedLogo, (canvas.width - logoWidth) / 2, logoY, logoWidth, logoHeight);
                     }
@@ -530,9 +601,7 @@
                         let fontSize = Math.floor(canvas.height * 0.18);
                         ctx.font = `700 ${fontSize}px "Chakra Petch"`;
                         const maxWidth = canvas.width * 0.9;
-                        while (ctx.measureText(customText).width > maxWidth && fontSize > 10) {
-                            fontSize--; ctx.font = `700 ${fontSize}px "Chakra Petch"`;
-                        }
+                        while (ctx.measureText(customText).width > maxWidth && fontSize > 10) { fontSize--; ctx.font = `700 ${fontSize}px "Chakra Petch"`; }
                         ctx.fillStyle = '#FFFFFF';
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'middle';
@@ -556,45 +625,73 @@
                 const nameParts = fullName.split(' ');
                 const lastName = nameParts.pop().toUpperCase();
                 const firstName = nameParts.join(' ');
-
-                // Decrease font and box sizes by 30%
                 const lastNameSize = (imgHeight * 0.15) * 0.7;
                 const firstNameSize = (imgHeight * 0.1) * 0.7;
-
                 ctx.font = `800 ${lastNameSize}px Poppins`;
                 const lastNameMetrics = ctx.measureText(lastName);
                 ctx.font = `italic 300 ${firstNameSize}px Farsan`;
                 const firstNameMetrics = ctx.measureText(firstName);
-
                 const boxPadding = lastNameSize * 0.2;
                 const boxWidth = Math.max(lastNameMetrics.width, firstNameMetrics.width) + (boxPadding * 2);
                 const boxHeight = lastNameSize + firstNameSize + (boxPadding * 2);
-                
                 const boxX = imgX + (imgWidth - boxWidth) / 2;
                 const boxY = imgY + imgHeight - boxHeight;
-
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
                 ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
-
-                // Draw First Name (italic)
                 ctx.fillStyle = '#000000';
                 ctx.font = `italic 300 ${firstNameSize}px Farsan`;
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(firstName, boxX + boxPadding, boxY + boxPadding + firstNameSize / 2);
-
-                // Draw Last Name (new color)
                 ctx.fillStyle = '#06402b';
                 ctx.font = `800 ${lastNameSize}px Poppins`;
                 ctx.fillText(lastName, boxX + boxPadding, boxY + boxPadding + firstNameSize + lastNameSize / 2);
-
-                // Reset shadow properties just in case
-                ctx.shadowColor = 'transparent';
-                ctx.shadowBlur = 0;
-                ctx.shadowOffsetX = 0;
-                ctx.shadowOffsetY = 0;
             }
 
+            function drawDoublesNames(ctx, name1, name2, alignment) {
+                const canvas = ctx.canvas;
+                const imgHeight = canvas.height * 0.85; // Base height reference
+                const lastName1 = name1.split(' ').pop().toUpperCase() + ' /'; // Top name
+                const lastName2 = name2.split(' ').pop().toUpperCase(); // Bottom name
+
+                const lastName2Size = (imgHeight * 0.15) * 0.7; // Bottom name size
+                const lastName1Size = (imgHeight * 0.1) * 0.7;   // Top name size
+
+                ctx.font = `300 ${lastName1Size}px Inter`;
+                const lastName1Metrics = ctx.measureText(lastName1);
+                ctx.font = `800 ${lastName2Size}px Inter`;
+                const lastName2Metrics = ctx.measureText(lastName2);
+
+                const boxPadding = lastName2Size * 0.2;
+                const boxWidth = Math.max(lastName1Metrics.width, lastName2Metrics.width) + (boxPadding * 2);
+                const boxHeight = lastName1Size + lastName2Size + (boxPadding * 2);
+                
+                const paddingFromEdge = canvas.width * 0.02; // Standard padding
+                const boxYPos = canvas.height - boxHeight - paddingFromEdge;
+                
+                let boxXPos;
+                if (alignment === 'left') {
+                    boxXPos = paddingFromEdge;
+                } else { // right
+                    boxXPos = canvas.width - boxWidth - paddingFromEdge;
+                }
+
+                // Draw Box
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                ctx.fillRect(boxXPos, boxYPos, boxWidth, boxHeight);
+
+                // Draw Top Last Name (lastName1)
+                ctx.fillStyle = '#000000';
+                ctx.font = `300 ${lastName1Size}px Inter`;
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(lastName1, boxXPos + boxPadding, boxYPos + boxPadding + lastName1Size / 2);
+
+                // Draw Bottom Last Name (lastName2)
+                ctx.fillStyle = '#06402b';
+                ctx.font = `800 ${lastName2Size}px Inter`;
+                ctx.fillText(lastName2, boxXPos + boxPadding, boxYPos + boxPadding + lastName1Size + lastName2Size / 2);
+            }
 
             function loadImage(src) {
                 return new Promise((resolve, reject) => {
@@ -654,5 +751,4 @@
     </script>
 </body>
 </html>
-
 
