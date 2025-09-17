@@ -502,6 +502,25 @@
                     if (usePlayers) {
                         const doublesMode = doublesCheckbox.checked && player3Select.value && player4Select.value;
 
+                        if (uploadedLogo) {
+                            const logoPaddingPercent = 0.35;
+                            const maxLogoDim = Math.min(canvas.width, canvas.height) * logoPaddingPercent;
+                            const logoAR = uploadedLogo.width / uploadedLogo.height;
+                            let logoWidth, logoHeight;
+                            if (logoAR > 1) { 
+                                logoWidth = maxLogoDim; 
+                                logoHeight = logoWidth / logoAR; 
+                            } else { 
+                                logoHeight = maxLogoDim; 
+                                logoWidth = logoHeight * logoAR; 
+                            }
+                            
+                            const logoX = (canvas.width - logoWidth) / 2;
+                            const logoY = canvas.height * 0.125; 
+                            
+                            ctx.drawImage(uploadedLogo, logoX, logoY, logoWidth, logoHeight);
+                        }
+
                         if (doublesMode) {
                             const [p1, p2, p3, p4] = await Promise.all([
                                 loadImage(player1Select.value), loadImage(player2Select.value),
@@ -522,25 +541,21 @@
                             const p3Y = canvas.height - p3Height;
                             const p4Y = canvas.height - p4Height;
 
-                            const separationOffset = canvas.width * 0.015; // 1.5% for each side of the 3% gap
+                            const separationOffset = canvas.width * 0.015;
 
                             const p1OrigX = 0;
                             const p2OrigX = canvas.width - p2Width;
 
-                            // Left side players
                             const p1TargetX = p1OrigX - (canvas.width * 0.12);
                             const p3TargetX = p1OrigX;
                             const p1NewX = p1TargetX - separationOffset;
                             const p3NewX = p3TargetX + separationOffset + (canvas.width * 0.08);
 
-
-                            // Right side players
                             const p2TargetX = p2OrigX + (canvas.width * 0.12);
                             const p4TargetX = p2OrigX;
                             const p2NewX = p2TargetX + separationOffset;
                             const p4NewX = p4TargetX - separationOffset - (canvas.width * 0.08);
 
-                            // Draw bottom players first, then top players
                             ctx.drawImage(p1, p1NewX, imgY, p1Width, imgHeight);
                             ctx.drawImage(p3, p3NewX, p3Y, p3Width, p3Height);
                             
@@ -552,9 +567,8 @@
                             const name3 = player3Select.options[player3Select.selectedIndex].text;
                             const name4 = player4Select.options[player4Select.selectedIndex].text;
 
-                            // Pass top player (P3/P4) name first, then bottom player (P1/P2)
-                            drawDoublesNames(ctx, name3, name1, 'left');
-                            drawDoublesNames(ctx, name4, name2, 'right');
+                            drawDoublesNames(ctx, name1, name3, 'left');
+                            drawDoublesNames(ctx, name2, name4, 'right');
 
                         } else {
                             const playerImg1 = await loadImage(player1Select.value);
@@ -650,12 +664,12 @@
 
             function drawDoublesNames(ctx, name1, name2, alignment) {
                 const canvas = ctx.canvas;
-                const imgHeight = canvas.height * 0.85; // Base height reference
+                const imgHeight = canvas.height * 0.85; 
                 const lastName1 = name1.split(' ').pop().toUpperCase() + ' /'; // Top name
                 const lastName2 = name2.split(' ').pop().toUpperCase(); // Bottom name
 
-                const lastName2Size = (imgHeight * 0.15) * 0.7; // Bottom name size
-                const lastName1Size = (imgHeight * 0.1) * 0.7;   // Top name size
+                const lastName2Size = (imgHeight * 0.15) * 0.7; 
+                const lastName1Size = (imgHeight * 0.1) * 0.7;
 
                 ctx.font = `300 ${lastName1Size}px Inter`;
                 const lastName1Metrics = ctx.measureText(lastName1);
@@ -666,7 +680,7 @@
                 const boxWidth = Math.max(lastName1Metrics.width, lastName2Metrics.width) + (boxPadding * 2);
                 const boxHeight = lastName1Size + lastName2Size + (boxPadding * 2);
                 
-                const paddingFromEdge = canvas.width * 0.02; // Standard padding
+                const paddingFromEdge = canvas.width * 0.02;
                 const boxYPos = canvas.height - boxHeight - paddingFromEdge;
                 
                 let boxXPos;
@@ -676,18 +690,15 @@
                     boxXPos = canvas.width - boxWidth - paddingFromEdge;
                 }
 
-                // Draw Box
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
                 ctx.fillRect(boxXPos, boxYPos, boxWidth, boxHeight);
 
-                // Draw Top Last Name (lastName1)
                 ctx.fillStyle = '#000000';
                 ctx.font = `300 ${lastName1Size}px Inter`;
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(lastName1, boxXPos + boxPadding, boxYPos + boxPadding + lastName1Size / 2);
 
-                // Draw Bottom Last Name (lastName2)
                 ctx.fillStyle = '#06402b';
                 ctx.font = `800 ${lastName2Size}px Inter`;
                 ctx.fillText(lastName2, boxXPos + boxPadding, boxYPos + boxPadding + lastName1Size + lastName2Size / 2);
