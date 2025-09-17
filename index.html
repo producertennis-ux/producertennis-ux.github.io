@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Tomorrow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Tomorrow:wght@400;800&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -239,6 +239,15 @@
             const swatches2 = document.querySelectorAll('#presets-2-wrapper .swatch');
             const customTextInput = document.getElementById('custom-text-input');
 
+            // --- AUTO-CAPS for custom text input ---
+            customTextInput.addEventListener('input', (e) => {
+                // Preserve cursor position while converting to uppercase
+                const start = e.target.selectionStart;
+                const end = e.target.selectionEnd;
+                e.target.value = e.target.value.toUpperCase();
+                e.target.setSelectionRange(start, end);
+            });
+
             // --- State & Constants ---
             let uploadedLogo = null;
 
@@ -374,7 +383,7 @@
                 
                 // --- Ensure custom font is loaded before drawing on canvas ---
                 try {
-                    await document.fonts.load('500 1em Tomorrow');
+                    await document.fonts.load('700 1em "Chakra Petch"');
                 } catch (err) {
                     console.error('Font could not be loaded: ', err);
                     // The script will continue and use a fallback font.
@@ -437,14 +446,14 @@
 
                     // 4. Draw custom text if provided
                     if (customText) {
-                        let fontSize = Math.floor(canvas.height * 0.15); // Dramatically increased font size
-                        ctx.font = `500 ${fontSize}px Tomorrow`;
+                        let fontSize = Math.floor(canvas.height * 0.18); // Dramatically increased font size
+                        ctx.font = `700 ${fontSize}px "Chakra Petch"`;
                         
                         const maxWidth = canvas.width * 0.9;
                         let textWidth = ctx.measureText(customText).width;
                         while (textWidth > maxWidth && fontSize > 10) {
                             fontSize--;
-                            ctx.font = `500 ${fontSize}px Tomorrow`;
+                            ctx.font = `700 ${fontSize}px "Chakra Petch"`;
                             textWidth = ctx.measureText(customText).width;
                         }
                         
@@ -517,6 +526,4 @@
     </script>
 </body>
 </html>
-
-
 
